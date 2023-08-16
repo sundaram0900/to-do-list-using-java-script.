@@ -4,15 +4,28 @@ const addTaskInput = document.getElementById("add");
 const tasksCounter = document.getElementById("tasks-counter");
 
 console.log("Working");
+function fetchTodos() {
+  fetch("https://jsonplaceholder.typicode.com/todos")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      tasks = data.slice(0, 10);
+      renderList();
+    })
+    .catch(function (error) {
+      console.log("error", error);
+    });
+}
 
 function addTasktoDOM(task) {
   const li = document.createElement("li");
   li.innerHTML = `
   <li>
   <input type="checkbox" id="${task.id}" ${
-    task.done ? "checked" : ""
+    task.completed ? "checked" : ""
   } class="custom-checkbox">
-  <label for="${task.id}">${task.text}</label>
+  <label for="${task.id}">${task.title}</label>
   <img src="https://icon-library.com/images/delete-button-icon/delete-button-icon-29.jpg" class="delete" data-id="${
     task.id
   }"  / length="10px"
@@ -34,12 +47,12 @@ function renderList() {
 
 function toggleTask(taskId) {
   const task = tasks.filter(function (task) {
-    return task.id === taskId;
+    return task.id === Number(taskId);
   });
 
   if (task.length > 0) {
     const currentTask = task[0];
-    currentTask.done = !currentTask.done;
+    currenttask.completed = !currenttask.completed;
     renderList();
     showNotification("task is toggled successfully");
     return;
@@ -48,7 +61,7 @@ function toggleTask(taskId) {
 
 function deleteTask(taskId) {
   const newTasks = tasks.filter(function (task) {
-    return task.id !== taskId;
+    return task.id !== Number(taskId);
   });
   tasks = newTasks;
   renderList();
@@ -79,9 +92,9 @@ function handleInputKeypress(e) {
       return;
     }
     const task = {
-      text,
-      id: Date.now().toString(),
-      done: false,
+      title: text,
+      id: Date.now(),
+      completed: false,
     };
     e.target.value = "";
     addTask(task);
@@ -102,5 +115,10 @@ function handleClicklistner(e) {
   }
 }
 
-addTaskInput.addEventListener("keyup", handleInputKeypress);
-document.addEventListener("click", handleClicklistner);
+function initializeApp() {
+  fetchTodos();
+  addTaskInput.addEventListener("keyup", handleInputKeypress);
+  document.addEventListener("click", handleClicklistner);
+}
+
+initializeApp();
